@@ -55,6 +55,8 @@
                 const optionElement = document.createElement('div');
                 optionElement.className = 'test-question-option';
 
+            
+
                 const inputId = 'answer-' + answer.id
                 const inputElement = document.createElement('input');
                 inputElement.className = 'option-answer';
@@ -62,6 +64,7 @@
                 inputElement.setAttribute('id', inputId);
                 inputElement.setAttribute('type', 'radio');
                 inputElement.setAttribute('value', answer.id);
+                inputElement.setAttribute('disabled', 'disabled');
                 
 
                 const labelElement = document.createElement('label');
