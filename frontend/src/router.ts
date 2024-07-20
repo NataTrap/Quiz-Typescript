@@ -1,18 +1,27 @@
-import {Form} from "./components/form.js";
-import {Choice} from "./components/choice.js";
-import {Test} from "./components/test.js";
-import {Result} from "./components/result.js";
-import {Answers} from "./components/answers.js";
-import {Auth} from "./services/auth.js";
+import {Form} from "./components/form";
+import {Choice} from "./components/choice";
+import {Test} from "./components/test";
+import {Result} from "./components/result";
+import {Answers} from "./components/answers";
+import {Auth} from "./services/auth";
+import {RouteType} from "./type/route.type";
+import {UserInfoType} from "./type/user-info.type";
 
 export class Router {
+    readonly contentElement: HTMLElement | null;
+    readonly stylesElement: HTMLElement | null;
+    readonly titelElement: HTMLElement | null;
+    readonly profileElement: HTMLElement | null;
+    readonly profileFullNameElement: HTMLElement | null;
+    private routes: RouteType[]
 
     constructor() {
         this.contentElement = document.getElementById('content');
         this.stylesElement = document.getElementById('styles');
-        this.titelElement =  document.getElementById('page-title');
-        this.profileElement =  document.getElementById('profile');
-        this.profileFullNameElement =  document.getElementById('profile-full-name');
+        this.titelElement = document.getElementById('page-title');
+        this.profileElement = document.getElementById('profile');
+        this.profileFullNameElement = document.getElementById('profile-full-name');
+
 
         this.routes = [
             {
@@ -80,21 +89,37 @@ export class Router {
         ]
     }
 
-    async openRoute() {
-        const urlRoute =  window.location.hash.split('?')[0];
+    public async openRoute(): Promise<void> {
+        const urlRoute: string = window.location.hash.split('?')[0];
         if (urlRoute === '#/logout') {
-           Auth.logout()
+            const result: boolean =  await Auth.logout()
+            if (result) {
+                window.location.href = '#/';
+                return;
+            } else {
+
+            }
+        }
+
+
+        const newRoute: RouteType | undefined = this.routes.find(item => {
+            return item.route === urlRoute;
+        });
+
+        if (!newRoute) {
             window.location.href = '#/';
             return;
         }
 
 
-        const newRoute = this.routes.find(item => {
-            return item.route === urlRoute;
-        });
-        if (!newRoute) {
-            window.location.href = '#/';
-            return;
+        if (!this.contentElement || !this.stylesElement || ! this.titelElement || !this.profileElement
+            || !this.profileFullNameElement) {
+            if (urlRoute === '#/') {
+                return
+            } else {
+                window.location.href = '#/';
+                return;
+            }
         }
 
         this.contentElement.innerHTML =
@@ -102,9 +127,8 @@ export class Router {
         this.stylesElement.setAttribute('href', newRoute.styles);
         this.titelElement.innerText = newRoute.title
 
-
-        const userInfo = Auth.getUserInfo();
-        const accessToken = localStorage.getItem(Auth.accessTokenKey);
+        const userInfo: UserInfoType | null = Auth.getUserInfo();
+        const accessToken: string | null = localStorage.getItem(Auth.accessTokenKey);
         if (userInfo && accessToken) {
             this.profileElement.style.display = 'flex';
             this.profileFullNameElement.innerText = userInfo.fullName
